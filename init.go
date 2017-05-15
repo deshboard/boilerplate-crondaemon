@@ -5,16 +5,13 @@ import (
 	"time"
 
 	_ "expvar"
-	"net/http"
 	_ "net/http/pprof"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/deshboard/boilerplate-service/app"
+	"github.com/deshboard/boilerplate-crondaemon/app"
 	"github.com/evalphobia/logrus_fluent"
 	"github.com/kelseyhightower/envconfig"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/sagikazarmark/serverz"
-	"golang.org/x/net/trace"
 	"gopkg.in/airbrake/gobrake.v2"
 	logrus_airbrake "gopkg.in/gemnasium/logrus-airbrake-hook.v2"
 )
@@ -23,7 +20,6 @@ import (
 var (
 	config   = &app.Configuration{}
 	logger   = logrus.New().WithField("service", app.ServiceName) // Use logrus.FieldLogger type
-	tracer   = opentracing.GlobalTracer()
 	shutdown = serverz.NewShutdown(logger)
 )
 
@@ -45,15 +41,10 @@ func init() {
 	}
 
 	// Load flags into configuration
-	flag.StringVar(&config.ServiceAddr, "service", defaultAddr+":80", "Service address.")
+	flag.BoolVar(&config.Daemon, "daemon", false, "Start as daemon.")
 	flag.StringVar(&config.HealthAddr, "health", defaultAddr+":10000", "Health service address.")
 	flag.StringVar(&config.DebugAddr, "debug", defaultAddr+":10001", "Debug service address.")
 	flag.DurationVar(&config.ShutdownTimeout, "shutdown", 2*time.Second, "Shutdown timeout.")
-
-	// This is probably OK as the service runs in Docker
-	trace.AuthRequest = func(req *http.Request) (any, sensitive bool) {
-		return true, true
-	}
 
 	// Initialize Airbrake
 	if config.AirbrakeEnabled {

@@ -8,7 +8,8 @@ type Configuration struct {
 	Environment string `default:"production"`
 	Debug       bool   `split_words:"true"`
 
-	ServiceAddr     string        `ignored:"true"`
+	Daemon          bool          `ignored:"true"`
+	DaemonSchedule  time.Duration `split_words:"true"`
 	HealthAddr      string        `ignored:"true"`
 	DebugAddr       string        `ignored:"true"`
 	ShutdownTimeout time.Duration `ignored:"true"`

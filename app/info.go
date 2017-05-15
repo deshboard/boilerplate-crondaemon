@@ -2,8 +2,8 @@ package app
 
 // Service info
 const (
-	ServiceName         = "boilerplate.service"
-	FriendlyServiceName = "Boilerplate"
+	ServiceName         = "boilerplate.crondaemon"
+	FriendlyServiceName = "Boilerplate Cron/Daemon"
 )
 
 // Provisioned by ldflags
