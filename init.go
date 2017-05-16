@@ -11,21 +11,22 @@ import (
 	"github.com/deshboard/boilerplate-crondaemon/app"
 	"github.com/evalphobia/logrus_fluent"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/sagikazarmark/serverz"
+	"github.com/sagikazarmark/utilz/errors"
+	"github.com/sagikazarmark/utilz/util"
 	"gopkg.in/airbrake/gobrake.v2"
 	logrus_airbrake "gopkg.in/gemnasium/logrus-airbrake-hook.v2"
 )
 
 // Global context variables
 var (
-	config   = &app.Configuration{}
-	logger   = logrus.New().WithField("service", app.ServiceName) // Use logrus.FieldLogger type
-	shutdown = serverz.NewShutdown(logger)
+	config          = &app.Configuration{}
+	logger          = logrus.New().WithField("service", app.ServiceName)
+	shutdownManager = util.NewShutdownManager(errors.NewLogHandler(logger))
 )
 
 func init() {
 	// Register shutdown handler in logrus
-	logrus.RegisterExitHandler(shutdown.Handle)
+	logrus.RegisterExitHandler(shutdownManager.Shutdown)
 
 	// Load configuration from environment
 	err := envconfig.Process("", config)
@@ -61,7 +62,7 @@ func init() {
 		})
 
 		logger.Logger.Hooks.Add(airbrakeHook)
-		shutdown.Register(airbrake.Close)
+		shutdownManager.Register(airbrake.Close)
 	}
 
 	// Initialize Fluentd
@@ -71,10 +72,16 @@ func init() {
 			logger.Panic(err)
 		}
 
-		fluentdHook.SetTag(app.ServiceName)
+		// Configure fluent tag
+		if app.FluentdTag != "" {
+			fluentdHook.SetTag(app.FluentdTag)
+		} else {
+			fluentdHook.SetTag(app.ServiceName)
+		}
+
 		fluentdHook.AddFilter("error", logrus_fluent.FilterError)
 
 		logger.Logger.Hooks.Add(fluentdHook)
-		shutdown.Register(fluentdHook.Fluent.Close)
+		shutdownManager.Register(fluentdHook.Fluent.Close)
 	}
 }
