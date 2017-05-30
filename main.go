@@ -40,7 +40,7 @@ func main() {
 		"buildDate":   app.BuildDate,
 		"environment": config.Environment,
 		"mode":        mode,
-	}).Printf("Starting %s", app.FriendlyServiceName)
+	}).Infof("Starting %s", app.FriendlyServiceName)
 
 	job := app.NewJob(logger)
 
@@ -63,18 +63,22 @@ func main() {
 				},
 				Name: "debug",
 			}
-			shutdownManager.RegisterAsFirst(debugServer.Close)
 
+			shutdownManager.RegisterAsFirst(debugServer.Close)
 			go serverManager.ListenAndStartServer(debugServer, config.DebugAddr)(errChan)
 		}
 
 		status := healthz.NewStatusChecker(healthz.Healthy)
-		readiness := status
-		healthHandler := healthz.NewHealthServiceHandler(healthz.NewCheckers(), readiness)
+		healthService := healthz.NewHealthService(healthz.NewCheckers(), status)
+		healthHandler := http.NewServeMux()
+
+		healthHandler.HandleFunc("/healthz", healthService.HealthStatus)
+		healthHandler.HandleFunc("/readiness", healthService.ReadinessStatus)
 
 		if config.MetricsEnabled {
-			healthHandler := healthHandler.(*http.ServeMux)
-			healthHandler.Handle("/", promhttp.Handler())
+			logger.Debug("Serving metrics under health endpoint")
+
+			healthHandler.Handle("/metrics", promhttp.Handler())
 		}
 
 		healthServer := &serverz.NamedServer{
@@ -84,8 +88,8 @@ func main() {
 			},
 			Name: "health",
 		}
-		shutdownManager.RegisterAsFirst(healthServer.Close)
 
+		shutdownManager.RegisterAsFirst(healthServer.Close)
 		go serverManager.ListenAndStartServer(healthServer, config.HealthAddr)(errChan)
 
 		ticker := time.NewTicker(config.DaemonSchedule)
@@ -123,6 +127,8 @@ func main() {
 				logger.Infof(fmt.Sprintf("Captured %v", s))
 				status.SetStatus(healthz.Unhealthy)
 				close(quit)
+
+				logger.Debugf("Shutting down with timeout %v", config.ShutdownTimeout)
 
 				ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 				wg := &sync.WaitGroup{}
