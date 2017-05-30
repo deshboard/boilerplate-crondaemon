@@ -11,6 +11,7 @@ import (
 	"github.com/deshboard/boilerplate-crondaemon/app"
 	"github.com/evalphobia/logrus_fluent"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sagikazarmark/healthz"
 	"github.com/sagikazarmark/utilz/errors"
 	"github.com/sagikazarmark/utilz/util"
 	"gopkg.in/airbrake/gobrake.v2"
@@ -19,9 +20,10 @@ import (
 
 // Global context variables
 var (
-	config          = &app.Configuration{}
-	logger          = logrus.New().WithField("service", app.ServiceName)
-	shutdownManager = util.NewShutdownManager(errors.NewLogHandler(logger))
+	config           = &app.Configuration{}
+	logger           = logrus.New().WithField("service", app.ServiceName)
+	shutdownManager  = util.NewShutdownManager(errors.NewLogHandler(logger))
+	checkerCollector = healthz.Collector{}
 )
 
 func init() {
