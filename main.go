@@ -42,7 +42,7 @@ func main() {
 		"mode":        mode,
 	}).Infof("Starting %s", app.FriendlyServiceName)
 
-	job := app.NewJob(logger)
+	job := newJob()
 
 	if false == config.Daemon {
 		job.Run()
