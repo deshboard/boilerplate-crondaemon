@@ -70,6 +70,7 @@ func main() {
 
 		status := healthz.NewStatusChecker(healthz.Healthy)
 		checkerCollector.RegisterChecker(healthz.ReadinessCheck, status)
+
 		healthService := checkerCollector.NewHealthService()
 		healthHandler := http.NewServeMux()
 
