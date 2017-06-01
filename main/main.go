@@ -129,7 +129,7 @@ func main() {
 				status.SetStatus(healthz.Unhealthy)
 				close(quit)
 
-				logger.Debugf("Shutting down with timeout %v", config.ShutdownTimeout)
+				logger.Debugf("Shutting down with '%v' timeout", config.ShutdownTimeout)
 
 				ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 				wg := &sync.WaitGroup{}
