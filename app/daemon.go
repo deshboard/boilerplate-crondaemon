@@ -3,16 +3,16 @@ package app
 import (
 	"fmt"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/go-kit/kit/log"
 )
 
 // Job is responsible for the main logic.
 type Job struct {
-	logger logrus.FieldLogger
+	logger log.Logger
 }
 
 // NewJob returns a new Job
-func NewJob(logger logrus.FieldLogger) *Job {
+func NewJob(logger log.Logger) *Job {
 	return &Job{logger}
 }
 

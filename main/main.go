@@ -4,94 +4,81 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/sagikazarmark/healthz"
-	"github.com/sagikazarmark/serverz"
+	"github.com/go-kit/kit/log/level"
+	"github.com/goph/emperror"
+	"github.com/goph/healthz"
+	"github.com/goph/serverz"
+	"github.com/kelseyhightower/envconfig"
 )
 
 func main() {
-	defer logger.Info("Shutting down")
-	defer shutdownManager.Shutdown()
+	config := &configuration{}
 
-	flag.Parse()
+	// Load configuration from environment
+	err := envconfig.Process("", config)
+	if err != nil {
+		panic(err)
+	}
+
+	// Load configuration from flags
+	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	config.flags(flags)
+	flags.Parse(os.Args[1:])
 
 	if config.Daemon && config.DaemonSchedule <= 0 {
-		logger.Fatal("Daemon mode requires the DAEMON_SCHEDULE environment variable to be set.")
+		panic("Daemon mode requires the DAEMON_SCHEDULE environment variable to be set.")
 	}
+
+	// Create a new logger
+	logger, closer := newLogger(config)
+	defer closer.Close()
+
+	// Create a new error handler
+	errorHandler, closer := newErrorHandler(config, logger)
+	defer closer.Close()
+
+	// Register error handler to recover from panics
+	defer emperror.HandleRecover(errorHandler)
 
 	mode := "cron"
 	if config.Daemon {
 		mode = "daemon"
 	}
 
-	logger.WithFields(logrus.Fields{
-		"version":     Version,
-		"commitHash":  CommitHash,
-		"buildDate":   BuildDate,
-		"environment": config.Environment,
-		"mode":        mode,
-	}).Infof("Starting %s", FriendlyServiceName)
+	level.Info(logger).Log(
+		"msg", fmt.Sprintf("Starting %s", FriendlyServiceName),
+		"version", Version,
+		"commitHash", CommitHash,
+		"buildDate", BuildDate,
+		"environment", config.Environment,
+		"mode", mode,
+	)
 
-	job := bootstrap()
+	job := newJob(logger)
 
 	if false == config.Daemon {
 		job.Run()
 	} else {
-		w := logger.Logger.WriterLevel(logrus.ErrorLevel)
-		shutdownManager.Register(w.Close)
-
-		serverManager := serverz.NewServerManager(logger)
-		errChan := make(chan error, 10)
+		healthCollector := healthz.Collector{}
+		serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
 		signalChan := make(chan os.Signal, 1)
 
-		var debugServer serverz.Server
 		if config.Debug {
-			debugServer = &serverz.NamedServer{
-				Server: &http.Server{
-					Handler:  http.DefaultServeMux,
-					ErrorLog: log.New(w, "debug: ", 0),
-				},
-				Name: "debug",
-			}
-
-			shutdownManager.RegisterAsFirst(debugServer.Close)
-			go serverManager.ListenAndStartServer(debugServer, config.DebugAddr)(errChan)
+			debugServer := newDebugServer(logger)
+			serverQueue.Append(debugServer, config.DebugAddr)
+			defer debugServer.Close()
 		}
 
-		status := healthz.NewStatusChecker(healthz.Healthy)
-		checkerCollector.RegisterChecker(healthz.ReadinessCheck, status)
+		healthServer, status := newHealthServer(logger, healthCollector)
+		serverQueue.Prepend(healthServer, config.HealthAddr)
+		defer healthServer.Close()
 
-		healthService := checkerCollector.NewHealthService()
-		healthHandler := http.NewServeMux()
-
-		healthHandler.Handle("/healthz", healthService.Handler(healthz.LivenessCheck))
-		healthHandler.Handle("/readiness", healthService.Handler(healthz.ReadinessCheck))
-
-		if config.MetricsEnabled {
-			logger.Debug("Serving metrics under health endpoint")
-
-			healthHandler.Handle("/metrics", promhttp.Handler())
-		}
-
-		healthServer := &serverz.NamedServer{
-			Server: &http.Server{
-				Handler:  healthHandler,
-				ErrorLog: log.New(w, "health: ", 0),
-			},
-			Name: "health",
-		}
-
-		shutdownManager.RegisterAsFirst(healthServer.Close)
-		go serverManager.ListenAndStartServer(healthServer, config.HealthAddr)(errChan)
+		errChan := serverQueue.Start()
 
 		ticker := time.NewTicker(config.DaemonSchedule)
 		quit := make(chan struct{})
@@ -115,31 +102,27 @@ func main() {
 			case err := <-errChan:
 				status.SetStatus(healthz.Unhealthy)
 				close(quit)
-
-				if err != nil {
-					logger.Error(err)
-				} else {
-					logger.Warning("Error channel received non-error value")
-				}
+				level.Debug(logger).Log("msg", "Error received from error channel")
+				emperror.HandleIfErr(errorHandler, err)
 
 				// Break the loop, proceed with regular shutdown
 				break MainLoop
 			case s := <-signalChan:
-				logger.Infof(fmt.Sprintf("Captured %v", s))
+				level.Info(logger).Log("msg", fmt.Sprintf("Captured %v", s))
 				status.SetStatus(healthz.Unhealthy)
 				close(quit)
 
-				logger.Debugf("Shutting down with '%v' timeout", config.ShutdownTimeout)
+				level.Debug(logger).Log(
+					"msg", "Shutting down with timeout",
+					"timeout", config.ShutdownTimeout,
+				)
 
 				ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
-				wg := &sync.WaitGroup{}
 
-				if config.Debug {
-					go serverManager.StopServer(debugServer, wg)(ctx)
+				err := serverQueue.Stop(ctx)
+				if err != nil {
+					errorHandler.Handle(err)
 				}
-				go serverManager.StopServer(healthServer, wg)(ctx)
-
-				wg.Wait()
 
 				// Cancel context if shutdown completed earlier
 				cancel()
