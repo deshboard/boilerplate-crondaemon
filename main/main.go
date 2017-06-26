@@ -59,7 +59,7 @@ func main() {
 		"mode", mode,
 	)
 
-	job := newJob(logger)
+	job := newJob(config, logger, errorHandler)
 
 	if false == config.Daemon {
 		job.Run()
