@@ -4,16 +4,18 @@ import (
 	"fmt"
 
 	"github.com/go-kit/kit/log"
+	"github.com/goph/emperror"
 )
 
 // Job is responsible for the main logic.
 type Job struct {
-	logger log.Logger
+	logger       log.Logger
+	errorHandler emperror.Handler
 }
 
 // NewJob returns a new Job
-func NewJob(logger log.Logger) *Job {
-	return &Job{logger}
+func NewJob(logger log.Logger, errorHandler emperror.Handler) *Job {
+	return &Job{logger, errorHandler}
 }
 
 // Run executes the main logic.

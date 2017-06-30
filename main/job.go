@@ -7,5 +7,5 @@ import (
 )
 
 func newJob(config *configuration, logger log.Logger, errorHandler emperror.Handler) *app.Job {
-	return app.NewJob(logger)
+	return app.NewJob(logger, errorHandler)
 }
