@@ -8,5 +8,10 @@ import (
 
 // newJob returns a new Job.
 func newJob(config *configuration, logger log.Logger, errorHandler emperror.Handler) *app.Job {
-	return app.NewJob(logger, errorHandler)
+	job := app.NewJob()
+
+	job.Logger = logger
+	job.ErrorHandler = errorHandler
+
+	return job
 }

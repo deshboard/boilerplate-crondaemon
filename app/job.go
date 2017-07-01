@@ -9,13 +9,16 @@ import (
 
 // Job is responsible for the main logic.
 type Job struct {
-	logger       log.Logger
-	errorHandler emperror.Handler
+	Logger       log.Logger
+	ErrorHandler emperror.Handler
 }
 
 // NewJob returns a new Job
-func NewJob(logger log.Logger, errorHandler emperror.Handler) *Job {
-	return &Job{logger, errorHandler}
+func NewJob() *Job {
+	return &Job{
+		Logger:       log.NewNopLogger(),
+		ErrorHandler: emperror.NewNullHandler(),
+	}
 }
 
 // Run executes the main logic.
