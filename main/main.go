@@ -59,7 +59,8 @@ func main() {
 		"mode", mode,
 	)
 
-	job := newJob(config, logger, errorHandler)
+	job, closer := newJob(config, logger, errorHandler)
+	defer closer.Close()
 
 	if false == config.Daemon {
 		job.Run()
