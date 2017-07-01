@@ -1,9 +1,8 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/goph/emperror"
 )
 
@@ -23,5 +22,5 @@ func NewJob() *Job {
 
 // Run executes the main logic.
 func (j *Job) Run() {
-	fmt.Println("Hello, World!")
+	level.Info(j.Logger).Log("msg", "Hello, World!")
 }
