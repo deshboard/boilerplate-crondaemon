@@ -8,7 +8,7 @@ import (
 )
 
 // newJob returns a new Job.
-func newJob(config *configuration, logger log.Logger, errorHandler emperror.Handler) (*app.Job, ext.Closer) {
+func newJob(config *configuration, logger log.Logger, errorHandler emperror.Handler, metricsReporter interface{}) (*app.Job, ext.Closer) {
 	job := app.NewJob()
 
 	job.Logger = logger

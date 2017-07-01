@@ -59,13 +59,15 @@ func main() {
 		"mode", mode,
 	)
 
-	job, closer := newJob(config, logger, errorHandler)
+	metricsReporter := newMetricsReporter(config)
+	job, closer := newJob(config, logger, errorHandler, metricsReporter)
 	defer closer.Close()
 
 	if false == config.Daemon {
 		job.Run()
 	} else {
 		healthCollector := healthz.Collector{}
+
 		serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
 		signalChan := make(chan os.Signal, 1)
 
@@ -75,7 +77,7 @@ func main() {
 			defer debugServer.Close()
 		}
 
-		healthServer, status := newHealthServer(logger, healthCollector)
+		healthServer, status := newHealthServer(logger, healthCollector, metricsReporter)
 		serverQueue.Prepend(healthServer, config.HealthAddr)
 		defer healthServer.Close()
 
