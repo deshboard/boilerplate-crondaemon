@@ -13,6 +13,7 @@ import (
 	"github.com/goph/emperror"
 	"github.com/goph/healthz"
 	"github.com/goph/serverz"
+	"github.com/goph/stdlib/ext"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -35,15 +36,29 @@ func main() {
 	}
 
 	// Create a new logger
-	logger, closer := newLogger(config)
-	defer closer.Close()
+	logger := newLogger(config)
+	defer ext.Close(logger)
 
 	// Create a new error handler
-	errorHandler, closer := newErrorHandler(config, logger)
-	defer closer.Close()
+	errorHandler := newErrorHandler(config, logger)
+	defer ext.Close(errorHandler)
 
 	// Register error handler to recover from panics
 	defer emperror.HandleRecover(errorHandler)
+
+	healthCollector := healthz.Collector{}
+	tracer := newTracer(config)
+	metricsReporter := newMetricsReporter(config)
+
+	// Application context
+	app := &application{
+		config:          config,
+		logger:          logger,
+		errorHandler:    errorHandler,
+		healthCollector: healthCollector,
+		tracer:          tracer,
+		metricsReporter: metricsReporter,
+	}
 
 	mode := "cron"
 	if config.Daemon {
@@ -59,17 +74,13 @@ func main() {
 		"mode", mode,
 	)
 
-	metricsReporter := newMetricsReporter(config)
 	job, closer := newJob(config, logger, errorHandler, metricsReporter)
 	defer closer.Close()
 
 	if false == config.Daemon {
 		job.Run()
 	} else {
-		healthCollector := healthz.Collector{}
-
 		serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
-		signalChan := make(chan os.Signal, 1)
 
 		if config.Debug {
 			debugServer := newDebugServer(logger)
@@ -77,7 +88,7 @@ func main() {
 			defer debugServer.Close()
 		}
 
-		healthServer, status := newHealthServer(logger, healthCollector, metricsReporter)
+		healthServer, status := newHealthServer(app)
 		serverQueue.Prepend(healthServer, config.HealthAddr)
 		defer healthServer.Close()
 
@@ -97,6 +108,7 @@ func main() {
 			}
 		}()
 
+		signalChan := make(chan os.Signal, 1)
 		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
 	MainLoop:
