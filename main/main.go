@@ -60,6 +60,8 @@ func main() {
 		metricsReporter: metricsReporter,
 	}
 
+	serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
+
 	mode := "cron"
 	if config.Daemon {
 		mode = "daemon"
@@ -77,25 +79,25 @@ func main() {
 	job := newJob(appCtx)
 	defer ext.Close(job)
 
+	if config.Debug {
+		debugServer := newDebugServer(logger)
+		serverQueue.Append(debugServer, config.DebugAddr)
+		defer debugServer.Close()
+	}
+
+	healthServer, status := newHealthServer(appCtx)
+	serverQueue.Prepend(healthServer, config.HealthAddr)
+	defer healthServer.Close()
+
+	errChan := serverQueue.Start()
+
+	// Necessary for daemon mode
+	quit := make(chan struct{})
+
 	if false == config.Daemon {
 		job.Run()
 	} else {
-		serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
-
-		if config.Debug {
-			debugServer := newDebugServer(logger)
-			serverQueue.Append(debugServer, config.DebugAddr)
-			defer debugServer.Close()
-		}
-
-		healthServer, status := newHealthServer(appCtx)
-		serverQueue.Prepend(healthServer, config.HealthAddr)
-		defer healthServer.Close()
-
-		errChan := serverQueue.Start()
-
 		ticker := time.NewTicker(config.DaemonSchedule)
-		quit := make(chan struct{})
 
 		go func() {
 			for {
@@ -107,44 +109,44 @@ func main() {
 				}
 			}
 		}()
+	}
 
-		signalChan := make(chan os.Signal, 1)
-		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 
-	MainLoop:
-		for {
-			select {
-			case err := <-errChan:
-				status.SetStatus(healthz.Unhealthy)
-				close(quit)
-				level.Debug(logger).Log("msg", "Error received from error channel")
-				emperror.HandleIfErr(errorHandler, err)
+MainLoop:
+	for {
+		select {
+		case err := <-errChan:
+			status.SetStatus(healthz.Unhealthy)
+			close(quit)
+			level.Debug(logger).Log("msg", "Error received from error channel")
+			emperror.HandleIfErr(errorHandler, err)
 
-				// Break the loop, proceed with regular shutdown
-				break MainLoop
-			case s := <-signalChan:
-				level.Info(logger).Log("msg", fmt.Sprintf("Captured %v", s))
-				status.SetStatus(healthz.Unhealthy)
-				close(quit)
+			// Break the loop, proceed with regular shutdown
+			break MainLoop
+		case s := <-signalChan:
+			level.Info(logger).Log("msg", fmt.Sprintf("Captured %v", s))
+			status.SetStatus(healthz.Unhealthy)
+			close(quit)
 
-				level.Debug(logger).Log(
-					"msg", "Shutting down with timeout",
-					"timeout", config.ShutdownTimeout,
-				)
+			level.Debug(logger).Log(
+				"msg", "Shutting down with timeout",
+				"timeout", config.ShutdownTimeout,
+			)
 
-				ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
+			ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 
-				err := serverQueue.Stop(ctx)
-				if err != nil {
-					errorHandler.Handle(err)
-				}
-
-				// Cancel context if shutdown completed earlier
-				cancel()
-
-				// Break the loop, proceed with regular shutdown
-				break MainLoop
+			err := serverQueue.Stop(ctx)
+			if err != nil {
+				errorHandler.Handle(err)
 			}
+
+			// Cancel context if shutdown completed earlier
+			cancel()
+
+			// Break the loop, proceed with regular shutdown
+			break MainLoop
 		}
 	}
 }
