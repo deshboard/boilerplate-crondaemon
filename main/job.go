@@ -1,18 +1,13 @@
 package main
 
-import (
-	"github.com/deshboard/boilerplate-crondaemon/app"
-	"github.com/go-kit/kit/log"
-	"github.com/goph/emperror"
-	"github.com/goph/stdlib/ext"
-)
+import "github.com/deshboard/boilerplate-crondaemon/app"
 
 // newJob returns a new Job.
-func newJob(config *configuration, logger log.Logger, errorHandler emperror.Handler, metricsReporter interface{}) (*app.Job, ext.Closer) {
+func newJob(appCtx *application) *app.Job {
 	job := app.NewJob()
 
-	job.Logger = logger
-	job.ErrorHandler = errorHandler
+	job.Logger = appCtx.logger
+	job.ErrorHandler = appCtx.errorHandler
 
-	return job, ext.NoopCloser
+	return job
 }

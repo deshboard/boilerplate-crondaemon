@@ -74,8 +74,8 @@ func main() {
 		"mode", mode,
 	)
 
-	job, closer := newJob(config, logger, errorHandler, metricsReporter)
-	defer closer.Close()
+	job := newJob(appCtx)
+	defer ext.Close(job)
 
 	if false == config.Daemon {
 		job.Run()
