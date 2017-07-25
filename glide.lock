@@ -1,5 +1,5 @@
-hash: 327c66f8700663ec7f020a90126d383b155ac9b182fdfb461ab2b898d07459db
-updated: 2017-07-23T00:14:28.041985304+02:00
+hash: 1739178345393d21cf7dcd14d564859d3cde148f01502344b6df76ba00e44ae8
+updated: 2017-07-26T01:39:51.409652377+02:00
 imports:
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
@@ -30,6 +30,8 @@ imports:
   subpackages:
   - errors
   - ext
+- name: github.com/joho/godotenv
+  version: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/kr/logfmt
