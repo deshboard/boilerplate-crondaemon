@@ -1,5 +1,5 @@
-hash: 02d44972e741cea43ba007304a0c033ad0b182a0e1284c1cab076bd4f9b0b457
-updated: 2017-07-27T00:21:28.895536733+02:00
+hash: ebee2a7d0c67ce97109f01189521fac15380ee485136e815615974419680acd2
+updated: 2017-08-07T23:07:09.950416317+02:00
 imports:
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
@@ -11,7 +11,7 @@ imports:
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
-  version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
+  version: 817915b46b97fd7bb80e8ab6b69f01a53ac3eebf
 - name: github.com/goph/emperror
   version: 9a1f931558972dfd6867293a0d27e3556f8727a0
   subpackages:
@@ -21,15 +21,22 @@ imports:
 - name: github.com/goph/log
   version: a2cdc6838c8fc6808cb719ce2eefbfb45315da53
 - name: github.com/goph/serverz
-  version: 896eb4b27239569d94ff9a23527f960c06388c38
+  version: a02fe1dc5dd783c14af882be7d3446332abdfc21
   subpackages:
+  - aio
+  - internal
   - internal/errors
-  - named
+  - internal/ext
 - name: github.com/goph/stdlib
-  version: 06da0be770f5309486af100793d48842f016fda8
+  version: ebad8d8b5b9843c6104e35acfee6f7b2d73503b2
   subpackages:
   - errors
+  - expvar
   - ext
+  - net
+  - net/http
+  - net/http/pprof
+  - x/net/trace
 - name: github.com/joho/godotenv
   version: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
 - name: github.com/kelseyhightower/envconfig
@@ -41,9 +48,9 @@ imports:
   subpackages:
   - log
 - name: github.com/uber-go/tally
-  version: 88e9c75b0cfc84139ad1bae3b7f123786cfd0770
+  version: 2605c407d7d219644d03a3680ad7df4779017782
 - name: golang.org/x/net
-  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
   subpackages:
   - context
   - internal/timeseries

@@ -60,6 +60,9 @@ func main() {
 		metrics:         metrics,
 	}
 
+	status := healthz.NewStatusChecker(healthz.Healthy)
+	appCtx.healthCollector.RegisterChecker(healthz.ReadinessCheck, status)
+
 	serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
 
 	mode := "cron"
@@ -79,14 +82,8 @@ func main() {
 	job := newJob(appCtx)
 	defer ext.Close(job)
 
-	if config.Debug {
-		debugServer := newDebugServer(logger)
-		serverQueue.Append(debugServer, config.DebugAddr)
-		defer debugServer.Close()
-	}
-
-	healthServer, status := newHealthServer(appCtx)
-	serverQueue.Prepend(healthServer, config.HealthAddr)
+	healthServer := newHealthServer(appCtx)
+	serverQueue.Prepend(healthServer)
 	defer healthServer.Close()
 
 	errChan := serverQueue.Start()
