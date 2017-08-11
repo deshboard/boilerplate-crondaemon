@@ -12,7 +12,6 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/goph/emperror"
 	"github.com/goph/healthz"
-	"github.com/goph/serverz"
 	"github.com/goph/stdlib/ext"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -63,8 +62,6 @@ func main() {
 	status := healthz.NewStatusChecker(healthz.Healthy)
 	appCtx.healthCollector.RegisterChecker(healthz.ReadinessCheck, status)
 
-	serverQueue := serverz.NewQueue(&serverz.Manager{Logger: logger})
-
 	mode := "cron"
 	if config.Daemon {
 		mode = "daemon"
@@ -82,9 +79,8 @@ func main() {
 	job := newJob(appCtx)
 	defer ext.Close(job)
 
-	healthServer := newHealthServer(appCtx)
-	serverQueue.Prepend(healthServer)
-	defer healthServer.Close()
+	serverQueue := newServerQueue(appCtx)
+	defer serverQueue.Close()
 
 	errChan := serverQueue.Start()
 
@@ -127,7 +123,7 @@ func main() {
 
 		ctx, cancel := context.WithTimeout(context.Background(), config.ShutdownTimeout)
 
-		err := serverQueue.Stop(ctx)
+		err := serverQueue.Shutdown(ctx)
 		if err != nil {
 			errorHandler.Handle(err)
 		}

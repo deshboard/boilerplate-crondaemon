@@ -1,5 +1,5 @@
-hash: ebee2a7d0c67ce97109f01189521fac15380ee485136e815615974419680acd2
-updated: 2017-08-09T22:45:04.141505739+02:00
+hash: 9ae66361085ec9b7b184d9890c7c8eb616feac3a0ef757f5fcdd925d328067af
+updated: 2017-08-11T19:08:01.744520447+02:00
 imports:
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
@@ -19,7 +19,7 @@ imports:
 - name: github.com/goph/healthz
   version: 571dac1216f2f4f920458b3b93f5835ec1bd35c6
 - name: github.com/goph/serverz
-  version: a02fe1dc5dd783c14af882be7d3446332abdfc21
+  version: 0db668bdb36032ac5e0154fba5b912fed99c2835
   subpackages:
   - aio
   - internal
@@ -48,7 +48,7 @@ imports:
 - name: github.com/uber-go/tally
   version: 2605c407d7d219644d03a3680ad7df4779017782
 - name: golang.org/x/net
-  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
+  version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
   - context
   - internal/timeseries
