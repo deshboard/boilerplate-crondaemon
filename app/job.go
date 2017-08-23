@@ -4,12 +4,13 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/goph/emperror"
+	"github.com/goph/stdlib/errors"
 )
 
 // Job is responsible for the main logic.
 type Job struct {
 	Logger       log.Logger
-	ErrorHandler emperror.Handler
+	ErrorHandler errors.Handler
 }
 
 // NewJob returns a new Job
