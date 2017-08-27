@@ -14,7 +14,7 @@ type configuration struct {
 
 	Daemon          bool          `ignored:"true"`
 	DaemonSchedule  time.Duration `split_words:"true"`
-	HealthAddr      string        `ignored:"true"`
+	DebugAddr       string        `ignored:"true"`
 	ShutdownTimeout time.Duration `ignored:"true"`
 }
 
@@ -31,6 +31,6 @@ func (c *configuration) flags(flags *flag.FlagSet) {
 
 	// Load flags into configuration
 	flags.BoolVar(&c.Daemon, "daemon", false, "Start as daemon.")
-	flags.StringVar(&c.HealthAddr, "health", defaultAddr+":10000", "Health service address.")
+	flags.StringVar(&c.DebugAddr, "debug.addr", defaultAddr+":10000", "Debug and health check address.")
 	flags.DurationVar(&c.ShutdownTimeout, "shutdown", 2*time.Second, "Shutdown timeout.")
 }
