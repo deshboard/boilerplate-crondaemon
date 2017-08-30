@@ -1,9 +1,9 @@
 package app
 
 import (
+	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/goph/stdlib/errors"
-	"github.com/goph/stdlib/log"
+	"github.com/goph/emperror"
 )
 
 // JobOption sets options in the Job.
@@ -17,7 +17,7 @@ func Logger(l log.Logger) JobOption {
 }
 
 // ErrorHandler returns a JobOption that sets the error handler for the Job.
-func ErrorHandler(l errors.Handler) JobOption {
+func ErrorHandler(l emperror.Handler) JobOption {
 	return func(j *Job) {
 		j.errorHandler = l
 	}
@@ -26,7 +26,7 @@ func ErrorHandler(l errors.Handler) JobOption {
 // Job is responsible for the main logic.
 type Job struct {
 	logger       log.Logger
-	errorHandler errors.Handler
+	errorHandler emperror.Handler
 }
 
 // NewJob returns a new Job
@@ -44,7 +44,7 @@ func NewJob(opts ...JobOption) *Job {
 
 	// Default error handler
 	if j.errorHandler == nil {
-		j.errorHandler = errors.NewNopHandler()
+		j.errorHandler = emperror.NewNopHandler()
 	}
 
 	return j
