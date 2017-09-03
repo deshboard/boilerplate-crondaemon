@@ -9,5 +9,8 @@ func newServerQueue(appCtx *application) *serverz.Queue {
 	debugServer := newDebugServer(appCtx)
 	queue.Prepend(debugServer, nil)
 
+	daemonServer := newDaemonServer(appCtx)
+	queue.Append(daemonServer, nil)
+
 	return queue
 }

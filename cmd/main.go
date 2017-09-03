@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/go-kit/kit/log/level"
 	"github.com/goph/emperror"
@@ -29,10 +28,6 @@ func main() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	config.flags(flags)
 	flags.Parse(os.Args[1:])
-
-	if config.Daemon && config.DaemonSchedule <= 0 {
-		panic("Daemon mode requires the DAEMON_SCHEDULE environment variable to be set.")
-	}
 
 	// Create a new logger
 	logger := newLogger(config)
@@ -62,47 +57,18 @@ func main() {
 	status := healthz.NewStatusChecker(healthz.Healthy)
 	appCtx.healthCollector.RegisterChecker(healthz.ReadinessCheck, status)
 
-	mode := "cron"
-	if config.Daemon {
-		mode = "daemon"
-	}
-
 	level.Info(logger).Log(
 		"msg", fmt.Sprintf("Starting %s", FriendlyServiceName),
 		"version", Version,
 		"commitHash", CommitHash,
 		"buildDate", BuildDate,
 		"environment", config.Environment,
-		"mode", mode,
 	)
-
-	job := newJob(appCtx)
-	defer ext.Close(job)
 
 	serverQueue := newServerQueue(appCtx)
 	defer serverQueue.Close()
 
 	errChan := serverQueue.Start()
-
-	// Necessary for daemon mode
-	quit := make(chan struct{})
-
-	if false == config.Daemon {
-		job.Run()
-	} else {
-		ticker := time.NewTicker(config.DaemonSchedule)
-
-		go func() {
-			for {
-				select {
-				case <-quit:
-					return
-				case <-ticker.C:
-					go job.Run()
-				}
-			}
-		}()
-	}
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
@@ -131,6 +97,4 @@ func main() {
 		// Cancel context if shutdown completed earlier
 		cancel()
 	}
-
-	close(quit)
 }
