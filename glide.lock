@@ -1,5 +1,5 @@
-hash: 350e296715bf090bb456f4d5e36a4e3d2eb51e1f543d348dfb27dba5831188e4
-updated: 2017-08-30T23:49:40.376569722+02:00
+hash: 4cf07677e0e15d51c40d4f44163a2610f267e9eb6c81f9817d69a075372ca862
+updated: 2017-09-03T18:46:26.630345295+02:00
 imports:
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
@@ -19,18 +19,14 @@ imports:
 - name: github.com/goph/healthz
   version: 571dac1216f2f4f920458b3b93f5835ec1bd35c6
 - name: github.com/goph/serverz
-  version: 0db668bdb36032ac5e0154fba5b912fed99c2835
+  version: a7e07fc73d8dddc4892648b8f990b518233bcbad
   subpackages:
-  - aio
   - internal
-  - internal/errors
-  - internal/ext
 - name: github.com/goph/stdlib
   version: bdfa619d30dc9afa78145c326ae0d9ec8e4edcc0
   subpackages:
   - expvar
   - ext
-  - net
   - net/http
   - net/http/pprof
   - x/net/trace
@@ -56,7 +52,7 @@ imports:
   - trace
 testImports:
 - name: github.com/DATA-DOG/godog
-  version: 70f777599da0f5de682b8848d356611c1738b695
+  version: 4dc98b0e2b130c3c9d06868a050320e5b310d3e7
   subpackages:
   - colors
   - gherkin
