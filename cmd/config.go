@@ -12,10 +12,11 @@ type configuration struct {
 	Debug       bool   `split_words:"true"`
 	LogFormat   string `split_words:"true" default:"json"`
 
-	Daemon          bool          `ignored:"true"`
-	DaemonSchedule  time.Duration `split_words:"true"`
 	DebugAddr       string        `ignored:"true"`
 	ShutdownTimeout time.Duration `ignored:"true"`
+
+	Daemon         bool          `ignored:"true"`
+	DaemonSchedule time.Duration `split_words:"true"`
 }
 
 // flags configures a flagset.
@@ -30,7 +31,8 @@ func (c *configuration) flags(flags *flag.FlagSet) {
 	}
 
 	// Load flags into configuration
-	flags.BoolVar(&c.Daemon, "daemon", false, "Start as daemon.")
 	flags.StringVar(&c.DebugAddr, "debug.addr", defaultAddr+":10000", "Debug and health check address.")
 	flags.DurationVar(&c.ShutdownTimeout, "shutdown", 2*time.Second, "Shutdown timeout.")
+
+	flags.BoolVar(&c.Daemon, "daemon", false, "Start as daemon.")
 }
