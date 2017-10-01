@@ -19,13 +19,13 @@ func newDaemonServer(app *application) serverz.Server {
 		Server: &serverz.DaemonServer{
 			Daemon: &serverz.CronDaemon{
 				Job: NewService(
-					Logger(app.logger),
-					ErrorHandler(app.errorHandler),
+					Logger(app.Logger()),
+					ErrorHandler(app.ErrorHandler()),
 				),
 				Ticker: ticker,
 			},
 		},
 		Name:   "daemon",
-		Logger: app.logger,
+		Logger: app.Logger(),
 	}
 }
