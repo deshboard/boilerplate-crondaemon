@@ -1,34 +1,39 @@
 package main
 
 import (
-	"github.com/goph/fw"
-	"github.com/goph/fw/log"
+	"time"
+
+	"github.com/deshboard/boilerplate-crondaemon/app"
+	"github.com/go-kit/kit/log"
+	"github.com/goph/emperror"
+	"github.com/goph/fxt/daemon"
+	"go.uber.org/dig"
 )
 
-// bootstrap bootstraps the application.
-func bootstrap() (*application, error) {
-	return newApplication(
-		configProvider,
-		applicationProvider,
-		healthProvider,
-	)
+// ServiceParams provides a set of dependencies for the service constructor.
+type ServiceParams struct {
+	dig.In
+
+	Config       *Config
+	Logger       log.Logger       `optional:"true"`
+	ErrorHandler emperror.Handler `optional:"true"`
 }
 
-// applicationProvider provides an fw.Application instance.
-func applicationProvider(app *application) error {
-	a := fw.NewApplication(
-		fw.Logger(log.NewLogger(
-			log.FormatString(app.config.LogFormat),
-			log.Debug(app.config.Debug),
-			log.With(
-				"environment", app.config.Environment,
-				"service", ServiceName,
-				"tag", LogTag,
-			),
-		)),
+// NewService constructs a new service instance.
+func NewService(params ServiceParams) daemon.Daemon {
+	service := app.NewService(
+		app.Logger(params.Logger),
+		app.ErrorHandler(params.ErrorHandler),
 	)
 
-	app.Application = a
+	var ticker *time.Ticker
 
-	return nil
+	if params.Config.Daemon {
+		ticker = time.NewTicker(params.Config.DaemonSchedule)
+	}
+
+	return &daemon.CronDaemon{
+		Job:    service,
+		Ticker: ticker,
+	}
 }

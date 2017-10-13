@@ -1,12 +1,11 @@
-hash: 1434525a8458e47a40c73416710d5b758d1c6858f564a20812d34fabd9314959
-updated: 2017-10-02T05:11:42.242432317+02:00
+hash: 422fbc94620c2c6d72668deeb925477b27f11f88a6e308f8ee2da75c1f5c1487
+updated: 2017-10-13T14:01:46.805736601+02:00
 imports:
 - name: github.com/go-kit/kit
-  version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
+  version: 4dc7be5d2d12881735283bcab7352178e190fc71
   subpackages:
   - log
   - log/level
-  - metrics
 - name: github.com/go-logfmt/logfmt
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
@@ -15,36 +14,35 @@ imports:
   version: 84194a32041fe2a0816fabf3fe54b0cc6156e8fc
   subpackages:
   - log
-- name: github.com/goph/fw
-  version: a0e08b00d044188ea1e6e42eaff36432ca4b7633
+- name: github.com/goph/fxt
+  version: b8ff97c205237c7823f56373bb5d234bf2500754
   subpackages:
-  - error
+  - daemon
+  - debug
+  - errors
   - log
 - name: github.com/goph/healthz
   version: 571dac1216f2f4f920458b3b93f5835ec1bd35c6
-- name: github.com/goph/serverz
-  version: e55582cb1f4eaef30fc1454deeb8474f19bc47cd
-  subpackages:
-  - internal
-- name: github.com/goph/stdlib
-  version: 5703fbf5f4f844082ae11de7e6e28deb61dba669
-  subpackages:
-  - expvar
-  - net/http
-  - net/http/pprof
-  - x/net/trace
 - name: github.com/joho/godotenv
   version: a79fa1e548e2c689c241d10173efd51e5d689d5b
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
-- name: github.com/opentracing/opentracing-go
-  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
-  subpackages:
-  - log
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: go.uber.org/atomic
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
+- name: go.uber.org/dig
+  version: f57771ac8fdc4c484fcd111a700659c6282e1509
+- name: go.uber.org/fx
+  version: a47f1657ce04f3d82db1ef230ffbb292b15af0ee
+  subpackages:
+  - internal/fxlog
+  - internal/fxreflect
+  - internal/lifecycle
+- name: go.uber.org/multierr
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
 - name: golang.org/x/net
   version: 1c05540f6879653db88113bc4a2b70aec4bd491f
   subpackages:
