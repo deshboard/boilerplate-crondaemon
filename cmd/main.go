@@ -43,14 +43,16 @@ func main() {
 			NewDebugConfig,
 			debug.NewServer,
 			debug.NewHealthCollector,
-
-			NewService,
-			daemon.NewRunner,
 		),
 		fx.Invoke(func(collector healthz.Collector) {
 			collector.RegisterChecker(healthz.ReadinessCheck, status)
 		}),
 		fx.Extract(&ext),
+
+		fx.Provide(
+			NewService,
+			daemon.NewRunner,
+		),
 	)
 
 	err := app.Err()
