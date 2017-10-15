@@ -1,5 +1,5 @@
-hash: 422fbc94620c2c6d72668deeb925477b27f11f88a6e308f8ee2da75c1f5c1487
-updated: 2017-10-13T19:47:51.750906902+02:00
+hash: 42e41adf656f730bf4e712f57a7e9085019b9123ce9227cb07e7ab6c51c4ddc9
+updated: 2017-10-15T13:26:33.599484952+02:00
 imports:
 - name: github.com/go-kit/kit
   version: 4dc7be5d2d12881735283bcab7352178e190fc71
@@ -15,7 +15,7 @@ imports:
   subpackages:
   - log
 - name: github.com/goph/fxt
-  version: b8ff97c205237c7823f56373bb5d234bf2500754
+  version: caed0d051cafaa5e612d576f71e1d202cce0b60e
   subpackages:
   - daemon
   - debug
