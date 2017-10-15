@@ -29,7 +29,10 @@ type Config struct {
 	// Timeout for graceful shutdown (configured by shutdown flag)
 	ShutdownTimeout time.Duration `ignored:"true"`
 
-	Daemon         bool          `ignored:"true"`
+	// Run the service in daemon mode instead of just running the job once.
+	Daemon bool `ignored:"true"`
+
+	// Schedule of the job when running in daemon mode.
 	DaemonSchedule time.Duration `split_words:"true"`
 }
 
