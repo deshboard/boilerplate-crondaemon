@@ -9,10 +9,11 @@ import (
 	"github.com/goph/emperror"
 	"github.com/goph/fxt"
 	"github.com/goph/fxt/daemon"
-	"github.com/goph/fxt/debug"
-	"github.com/goph/fxt/errors"
+	fxdebug "github.com/goph/fxt/debug"
+	fxerrors "github.com/goph/fxt/errors"
 	fxlog "github.com/goph/fxt/log"
 	"github.com/goph/healthz"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
 )
 
@@ -24,7 +25,7 @@ func main() {
 		Logger       log.Logger
 		ErrorHandler emperror.Handler
 
-		DebugErr  debug.Err
+		DebugErr  fxdebug.Err
 		DaemonErr daemon.Err
 	}
 
@@ -37,12 +38,12 @@ func main() {
 			// Log and error handling
 			NewLoggerConfig,
 			fxlog.NewLogger,
-			errors.NewHandler,
+			fxerrors.NewHandler,
 
 			// Debug server
 			NewDebugConfig,
-			debug.NewServer,
-			debug.NewHealthCollector,
+			fxdebug.NewServer,
+			fxdebug.NewHealthCollector,
 		),
 		fx.Invoke(func(collector healthz.Collector) {
 			collector.RegisterChecker(healthz.ReadinessCheck, status)
@@ -84,13 +85,13 @@ func main() {
 
 	case err := <-ext.DebugErr:
 		if err != nil {
-			err = emperror.WithStack(emperror.WithMessage(err, "debug server crashed"))
+			err = errors.Wrap(err, "debug server crashed")
 			ext.ErrorHandler.Handle(err)
 		}
 
 	case err := <-ext.DaemonErr:
 		if err != nil {
-			err = emperror.WithStack(emperror.WithMessage(err, "daemon crashed"))
+			err = errors.Wrap(err, "daemon crashed")
 			ext.ErrorHandler.Handle(err)
 		}
 	}
