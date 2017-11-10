@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/deshboard/boilerplate-crondaemon/app"
+	"github.com/deshboard/boilerplate-crondaemon/pkg/context/app"
 	"github.com/go-kit/kit/log"
 	"github.com/goph/emperror"
 	"github.com/goph/fxt/daemon"
@@ -21,9 +21,9 @@ type ServiceParams struct {
 
 // NewService returns a new service instance.
 func NewService(params ServiceParams) daemon.Daemon {
-	service := app.NewService(
-		app.Logger(params.Logger),
-		app.ErrorHandler(params.ErrorHandler),
+	service := context.NewService(
+		context.Logger(params.Logger),
+		context.ErrorHandler(params.ErrorHandler),
 	)
 
 	var ticker *time.Ticker
