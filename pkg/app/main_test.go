@@ -3,7 +3,7 @@ package app_test
 import (
 	"testing"
 
-	"github.com/deshboard/boilerplate-service/test"
+	"github.com/deshboard/boilerplate-crondaemon/test"
 )
 
 func TestMain(m *testing.M) {
