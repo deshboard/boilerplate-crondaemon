@@ -1,39 +1,29 @@
 package main
 
 import (
-	"time"
+	"flag"
 
-	"github.com/deshboard/boilerplate-crondaemon/pkg/app"
-	"github.com/go-kit/kit/log"
-	"github.com/goph/emperror"
-	"github.com/goph/fxt/daemon"
-	"go.uber.org/dig"
+	"github.com/deshboard/boilerplate-crondaemon/app"
 )
 
-// ServiceParams provides a set of dependencies for the service constructor.
-type ServiceParams struct {
-	dig.In
+const FriendlyServiceName = app.FriendlyServiceName
 
-	Config       *Config
-	Logger       log.Logger       `optional:"true"`
-	ErrorHandler emperror.Handler `optional:"true"`
+// NewConfig creates the application Config from flags and the environment.
+func NewConfig(flags *flag.FlagSet) *app.Config {
+	config := new(app.Config)
+
+	config.Flags(flags)
+
+	return config
 }
 
-// NewService returns a new service instance.
-func NewService(params ServiceParams) daemon.Daemon {
-	service := app.NewService(
-		app.Logger(params.Logger),
-		app.ErrorHandler(params.ErrorHandler),
-	)
-
-	var ticker *time.Ticker
-
-	if params.Config.Daemon {
-		ticker = time.NewTicker(params.Config.DaemonSchedule)
+// NewApp creates a new application.
+func NewApp(config *app.Config) *app.Application {
+	info := &app.ApplicationInfo{
+		Version:    Version,
+		CommitHash: CommitHash,
+		BuildDate:  BuildDate,
 	}
 
-	return &daemon.CronDaemon{
-		Job:    service,
-		Ticker: ticker,
-	}
+	return app.NewApp(config, info)
 }
