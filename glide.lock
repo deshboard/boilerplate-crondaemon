@@ -1,5 +1,5 @@
-hash: 8b76bad2e867f3abb4f80ef3cfdcaee929e4faf091dfb1c1d585dd6d9577a09e
-updated: 2017-11-16T15:09:44.773752012+01:00
+hash: dbc27ae6737203af3999c1d5999928cb403e8cdf0fb5016eb7a382919d542ebc
+updated: 2017-11-22T11:22:52.593498283+01:00
 imports:
 - name: github.com/DATA-DOG/godog
   version: 4dc98b0e2b130c3c9d06868a050320e5b310d3e7
@@ -20,7 +20,7 @@ imports:
   subpackages:
   - log
 - name: github.com/goph/fxt
-  version: 3a07bbb8ec0e51abc0f79f17363ae86c44a1837f
+  version: 328972b9d340f5600fe4f5fcbb1ccee34c562d0a
   subpackages:
   - daemon
   - debug
