@@ -14,7 +14,7 @@ import (
 type ServiceParams struct {
 	dig.In
 
-	Config       *Config
+	Config       Config
 	Logger       log.Logger       `optional:"true"`
 	ErrorHandler emperror.Handler `optional:"true"`
 }
