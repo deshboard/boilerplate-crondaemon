@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/deshboard/boilerplate-crondaemon/app"
-)
+import "github.com/deshboard/boilerplate-crondaemon/app"
 
 const FriendlyServiceName = app.FriendlyServiceName
 
