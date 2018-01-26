@@ -52,11 +52,12 @@ func TestConfig(t *testing.T) {
 	}{
 		"full config": {
 			map[string]string{
-				"ENVIRONMENT": "test",
-				"DEBUG":       "false",
-				"LOG_FORMAT":  "logfmt",
+				"ENVIRONMENT":     "test",
+				"DEBUG":           "false",
+				"LOG_FORMAT":      "logfmt",
+				"DAEMON_SCHEDULE": "5s",
 			},
-			[]string{"service", "--debug-addr", ":10001", "--shutdown-timeout", "10s"},
+			[]string{"service", "--debug-addr", ":10001", "--shutdown-timeout", "10s", "--daemon"},
 			Config{},
 			Config{
 				Environment:     "test",
@@ -64,6 +65,8 @@ func TestConfig(t *testing.T) {
 				LogFormat:       log.LogfmtFormat.String(),
 				DebugAddr:       ":10001",
 				ShutdownTimeout: 10 * time.Second,
+				Daemon:          true,
+				DaemonSchedule:  5 * time.Second,
 			},
 		},
 		"defaults": {
@@ -76,6 +79,8 @@ func TestConfig(t *testing.T) {
 				LogFormat:       log.JsonFormat.String(),
 				DebugAddr:       ":10000",
 				ShutdownTimeout: 15 * time.Second,
+				Daemon:          false,
+				DaemonSchedule:  0 * time.Second,
 			},
 		},
 	}
