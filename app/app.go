@@ -43,7 +43,7 @@ type Runner struct {
 	Logger log.Logger
 	Status *healthz.StatusChecker
 
-	DebugErr fxdebug.Err
+	DebugErr  fxdebug.Err
 	DaemonErr daemon.Err
 }
 
