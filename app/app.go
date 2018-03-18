@@ -31,8 +31,11 @@ var Module = fx.Options(
 	),
 
 	fx.Provide(
-		NewService,
 		daemon.NewRunner,
+	),
+
+	fx.Provide(
+		NewService,
 	),
 )
 
